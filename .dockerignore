@@ -1,0 +1,18 @@
+# Keep build inputs (maven wrapper, pom and source) in the build context
+!mvnw
+!.mvn/
+!pom.xml
+!src/
+
+# Ignore build output by default
+target/
+!target/*-runner
+!target/*-runner.jar
+!target/lib/
+!target/quarkus-app/
+
+# Ignore VCS and editor metadata
+.git
+.gitignore
+.idea/
+*.md
