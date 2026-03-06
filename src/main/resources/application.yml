@@ -9,13 +9,25 @@ quarkus:
     database:
       generation: update
 
+  rest-client:
+    api-pagamento-externo:
+      url: ${PAGAMENTO_EXTERNO_URL:http://localhost:8089}
+      connection-timeout: 5000
+      read-timeout: 10000
+
+#api-pagamento-externo/mp-rest/url: ${PAGAMENTO_EXTERNO_URL:http://localhost:8081}
+
 mp:
   messaging:
     incoming:
       solicitacoes-pagamentos:
         connector: smallrye-kafka
-        topic: solicitacoes-pagamentos # talvez receber por variavel de ambiente
+        topic: pedido.criado # talvez receber por variavel de ambiente
         value:
           deserializer: io.quarkus.kafka.client.serialization.ObjectMapperDeserializer
         group:
           id: pagamentos-worker-group
+
+kafka:
+  bootstrap:
+    servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}

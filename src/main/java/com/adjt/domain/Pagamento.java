@@ -26,7 +26,7 @@ public class Pagamento {
         this.status = status;
     }
 
-    public void aprovar() {
-        this.status = StatusPagamento.APROVADO;
+    public void pagar() {
+        this.status = StatusPagamento.PAGO;
     }
 }

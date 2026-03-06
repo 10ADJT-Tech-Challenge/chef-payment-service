@@ -19,7 +19,7 @@ public class PagamentoConsumerAdapter {
 
     @Blocking
     @Transactional
-    @Incoming("solicitacoes-pagamentos")
+    @Incoming("pedido.criado")
     public CompletionStage<Void> consumirMensagem(Message<SolicitacaoPagamentoMessage> mensagem) {
         SolicitacaoPagamentoMessage payload = mensagem.getPayload();
         System.out.println("Recebendo solicitação de pagamento: " + payload);
