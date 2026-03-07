@@ -16,7 +16,7 @@ public class GatewayPagamentoExternoAdapter implements GatewayPagamentoExterno {
     @Override
     public boolean processarPagamento(Pagamento pagamento) {
         SolicitacaoPagamentoRequest request = new SolicitacaoPagamentoRequest(
-                pagamento.getValor(),
+                pagamento.getValorEmCentavos(),
                 pagamento.getId().toString(),
                 pagamento.getUsarioId().toString()
         );

@@ -29,4 +29,9 @@ public class Pagamento {
     public void pagar() {
         this.status = StatusPagamento.PAGO;
     }
+
+    public int getValorEmCentavos() {
+        return valor.multiply(BigDecimal.valueOf(100)).intValue();
+    }
+
 }
