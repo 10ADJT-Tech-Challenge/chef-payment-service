@@ -2,7 +2,7 @@ package com.adjt.infrastructure.gateways;
 
 import com.adjt.application.exceptions.GatewayPagamentoIndisponivelException;
 import com.adjt.application.ports.out.GatewayPagamentoExterno;
-import com.adjt.domain.Pagamento;
+import com.adjt.domain.entities.Pagamento;
 import com.adjt.infrastructure.gateways.dto.PagamentoSolicitadoResponse;
 import com.adjt.infrastructure.gateways.dto.SolicitacaoPagamentoRequest;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -41,8 +41,9 @@ public class GatewayPagamentoExternoAdapter implements GatewayPagamentoExterno {
         return response.isAceito();
     }
 
+    @SuppressWarnings("unused")
     public boolean fallbackFalhaProcessamento(Pagamento pagamento, Throwable erro) {
-        LOG.error("Falha ao processar pagamento para o pedido {}. \nAcionando fallback.", pagamento, erro);
+        LOG.error("Falha ao processar pagamento para o pedido {}. \nAcionando fallback.", pagamento.getPedidoId());
 
         throw new GatewayPagamentoIndisponivelException("Serviço de pagamento fora do ar após retentativas. Motivo: %s".formatted(erro.getMessage()));
     }

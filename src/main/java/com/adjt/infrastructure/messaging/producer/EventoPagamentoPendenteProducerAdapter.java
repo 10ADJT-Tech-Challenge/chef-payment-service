@@ -1,7 +1,7 @@
 package com.adjt.infrastructure.messaging.producer;
 
 import com.adjt.application.ports.out.EventoPagamentoPendente;
-import com.adjt.domain.Pagamento;
+import com.adjt.domain.entities.Pagamento;
 import com.adjt.infrastructure.messaging.dto.EventoPagamentoPendenteMessage;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -15,7 +15,7 @@ public class EventoPagamentoPendenteProducerAdapter implements EventoPagamentoPe
     private static final Logger LOG = LoggerFactory.getLogger(EventoPagamentoPendenteProducerAdapter.class);
 
     @Inject
-    @Channel("pagamento.pendente")
+    @Channel("pagamento.pendente.out")
     Emitter<EventoPagamentoPendenteMessage> pagamentoPendenteEmitter;
 
     @Override
