@@ -14,8 +14,8 @@ public class PagamentoEntity extends PanacheEntityBase {
 
     @Id
     public UUID id;
-    public UUID usarioId;
-    public UUID pedidoID;
+    public UUID usuarioId;
+    public UUID pedidoId;
     public BigDecimal valor;
     public String status;
 }

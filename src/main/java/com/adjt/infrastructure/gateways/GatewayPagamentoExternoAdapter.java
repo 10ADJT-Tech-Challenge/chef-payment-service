@@ -35,14 +35,14 @@ public class GatewayPagamentoExternoAdapter implements GatewayPagamentoExterno {
     public boolean processarPagamento(Pagamento pagamento) {
         LOG.info("Solicitação pagamento gateway externo: {}", pagamento);
 
-        SolicitacaoPagamentoRequest request = new SolicitacaoPagamentoRequest(pagamento.getValorEmCentavos(), pagamento.getId().toString(), pagamento.getUsarioId().toString());
+        SolicitacaoPagamentoRequest request = new SolicitacaoPagamentoRequest(pagamento.getValorEmCentavos(), pagamento.getId().toString(), pagamento.getUsuarioId().toString());
 
         PagamentoSolicitadoResponse response = restClient.solicitarPagamento(request);
         return response.isAceito();
     }
 
     public boolean fallbackFalhaProcessamento(Pagamento pagamento, Throwable erro) {
-        LOG.error("Falha ao processar pagamento para o pedido {}. \nAcionando fallback. \nErro: {}", pagamento.getPedidoId(), erro.getMessage());
+        LOG.error("Falha ao processar pagamento para o pedido {}. \nAcionando fallback.", pagamento, erro);
 
         throw new GatewayPagamentoIndisponivelException("Serviço de pagamento fora do ar após retentativas. Motivo: %s".formatted(erro.getMessage()));
     }

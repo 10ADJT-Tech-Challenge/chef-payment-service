@@ -14,8 +14,8 @@ public class PagamentoRepository implements PanacheRepository<PagamentoEntity>, 
     public void salvar(Pagamento pagamento) {
         PagamentoEntity entity = new PagamentoEntity();
         entity.id = pagamento.getId();
-        entity.usarioId = pagamento.getUsarioId();
-        entity.pedidoID = pagamento.getPedidoId();
+        entity.usuarioId = pagamento.getUsuarioId();
+        entity.pedidoId = pagamento.getPedidoId();
         entity.valor = pagamento.getValor();
         entity.status = pagamento.getStatus().name();
 
