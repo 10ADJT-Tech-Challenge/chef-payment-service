@@ -1,0 +1,48 @@
+quarkus:
+  application:
+    name: chef-payment-service
+  datasource:
+    db-kind: postgresql
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    jdbc:
+      url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:pagamentosdb}
+      max-size: 16
+
+  hibernate-orm:
+    database:
+      generation: update
+
+  rest-client:
+    api-pagamento-externo:
+      url: ${PAGAMENTO_EXTERNO_URL:http://localhost:8089}
+    logging:
+      scope: all
+      body-limit: 1024
+
+  log:
+    category:
+      "io.quarkus.rest.client.logging":
+        level: DEBUG
+      "io.smallrye.faulttolerance":
+        level: DEBUG
+
+  jackson:
+    # Evita falhas caso o JSON venha com propriedades a mais que não estão no POJO
+    fail-on-unknown-properties: false
+
+mp:
+  messaging:
+    incoming:
+      "pedido.criado":
+        connector: smallrye-kafka
+
+    outgoing:
+      "pagamento.pendente":
+        connector: smallrye-kafka
+      "pagamento.aprovado":
+        connector: smallrye-kafka
+
+kafka:
+  bootstrap:
+    servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}
