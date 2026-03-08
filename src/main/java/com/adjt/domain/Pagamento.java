@@ -26,8 +26,8 @@ public class Pagamento {
         this.status = status;
     }
 
-    public void pagar() {
-        this.status = StatusPagamento.PAGO;
+    public void aprovar() {
+        this.status = StatusPagamento.APROVADO;
     }
 
     public int getValorEmCentavos() {

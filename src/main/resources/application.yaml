@@ -1,4 +1,6 @@
 quarkus:
+  application:
+    name: chef-payment-service
   datasource:
     db-kind: postgresql
     username: ${DB_USER:postgres}
@@ -14,33 +16,32 @@ quarkus:
   rest-client:
     api-pagamento-externo:
       url: ${PAGAMENTO_EXTERNO_URL:http://localhost:8089}
-      connection-timeout: 5000
-      read-timeout: 10000
     logging:
       scope: all
       body-limit: 1024
+
   log:
     category:
       "io.quarkus.rest.client.logging":
+        level: DEBUG
+      "io.smallrye.faulttolerance":
         level: DEBUG
 
   jackson:
     # Evita falhas caso o JSON venha com propriedades a mais que não estão no POJO
     fail-on-unknown-properties: false
 
-#api-pagamento-externo/mp-rest/url: ${PAGAMENTO_EXTERNO_URL:http://localhost:8081}
-
 mp:
   messaging:
     incoming:
       "pedido.criado":
         connector: smallrye-kafka
-        topic: pedido.criado # talvez receber por variavel de ambiente
-        group:
-          id: pagamentos-worker-group
-        auto:
-          offset:
-            reset: earliest
+
+    outgoing:
+      "pagamento.pendente":
+        connector: smallrye-kafka
+      "pagamento.aprovado":
+        connector: smallrye-kafka
 
 kafka:
   bootstrap:
