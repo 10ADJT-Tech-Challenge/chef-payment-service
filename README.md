@@ -13,7 +13,7 @@ Este serviço segue os princípios da **Arquitetura Hexagonal (Ports and Adapter
 *   **MicroProfile Fault Tolerance** (Resiliência: Circuit Breaker, Retry, Fallback, Timeout)
 *   **Docker** & **Docker Compose**
 
-## architecture Arquitetura do Projeto
+## 🏗️ Arquitetura do Projeto
 
 O projeto está estruturado em camadas conforme a Arquitetura Hexagonal:
 
@@ -21,15 +21,32 @@ O projeto está estruturado em camadas conforme a Arquitetura Hexagonal:
 src/main/java/com/adjt
 ├── application
 │   ├── ports         # Interfaces de entrada (In) e saída (Out)
-│   ├── usecases      # Implementação das regras de negócio
+│   ├── usecases      # Implementação das regras de negócio (Processar, Reprocessar)
+│   ├── shared        # Serviços de domínio compartilhados (EfetivarPagamentoService)
+│   └── exceptions    # Exceções de aplicação
+├── domain            # Núcleo da lógica de negócio
+│   ├── entities      # Entidades (Pagamento) e Enums (StatusPagamento)
 │   └── exceptions    # Exceções de domínio
-├── domain            # Entidades e objetos de valor do núcleo (Core)
 └── infrastructure    # Adaptadores externos
     ├── config        # Configurações do Quarkus/CDI
     ├── database      # Repositórios e Entidades JPA (PostgreSQL)
     ├── gateways      # Clientes REST para serviços externos
     └── messaging     # Consumidores e Produtores Kafka
 ```
+
+### Fluxos Principais
+
+1.  **Processamento de Pagamento:**
+    *   Recebe evento `pedido.criado`.
+    *   Cria registro de pagamento com status `PENDENTE`.
+    *   Chama Gateway Externo.
+    *   Se sucesso: Atualiza para `APROVADO` e publica evento `pagamento.aprovado`.
+    *   Se falha/erro: Mantém como `PENDENTE` e publica evento `pagamento.pendente`.
+
+2.  **Reprocessamento de Pagamento:**
+    *   Recebe evento `pagamento.pendente` (via Dead Letter Queue ou fluxo de retentativa).
+    *   Busca pagamento existente.
+    *   Reexecuta a lógica de chamada ao Gateway Externo.
 
 ## ⚙️ Configuração
 
@@ -50,8 +67,12 @@ O serviço utiliza variáveis de ambiente para configuração. Abaixo estão as 
 
 O serviço interage com outros microsserviços através de tópicos Kafka.
 
-*   **Consome:** `pedido.criado`
-*   **Produz:** `pagamento.aprovado`, `pagamento.pendente`
+*   **Consome:**
+    *   `pedido.criado` (Inicia fluxo de pagamento)
+    *   `pagamento.pendente` (Inicia fluxo de reprocessamento)
+*   **Produz:**
+    *   `pagamento.aprovado` (Sucesso)
+    *   `pagamento.pendente` (Falha recuperável)
 
 Para detalhes completos sobre os payloads JSON, consulte o arquivo [KAFKA_PAYLOADS.md](./KAFKA_PAYLOADS.md).
 
@@ -96,4 +117,4 @@ O serviço implementa padrões de resiliência na comunicação com o Gateway de
 *   **Timeout:** 1 segundo.
 *   **Retry:** 2 tentativas automáticas em caso de falha.
 *   **Circuit Breaker:** Abre o circuito se 50% das requisições falharem (janela de 4 requisições).
-*   **Fallback:** Em caso de falha total, o pagamento é marcado como pendente e um evento é disparado para tratamento posterior.
+*   **Fallback:** Em caso de falha total, o pagamento é marcado como pendente e um evento é disparado para tratamento posterior (reprocessamento).
