@@ -34,14 +34,20 @@ quarkus:
 mp:
   messaging:
     incoming:
-      "pedido.criado":
+      "pedido.criado.in":
         connector: smallrye-kafka
+        topic: pedido.criado
+      "pagamento.pendente.in":
+        connector: smallrye-kafka
+        topic: pagamento.pendente
 
     outgoing:
-      "pagamento.pendente":
+      "pagamento.pendente.out":
         connector: smallrye-kafka
-      "pagamento.aprovado":
+        topic: pagamento.pendente
+      "pagamento.aprovado.out":
         connector: smallrye-kafka
+        topic: pagamento.aprovado
 
 kafka:
   bootstrap:

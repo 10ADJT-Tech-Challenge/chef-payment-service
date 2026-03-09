@@ -1,62 +1,120 @@
-# chef-payment-service
+# Chef Payment Service
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Microsserviço responsável pelo processamento de pagamentos do ecossistema **Chef**, desenvolvido com **Java 21** e **Quarkus**.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+Este serviço segue os princípios da **Arquitetura Hexagonal (Ports and Adapters)** para garantir desacoplamento entre as regras de negócio e as tecnologias de infraestrutura.
 
-## Running the application in dev mode
+## 🚀 Tecnologias Utilizadas
 
-You can run your application in dev mode that enables live coding using:
+*   **Java 21**
+*   **Quarkus Framework** (Supersonic Subatomic Java)
+*   **PostgreSQL** (Persistência de dados via Hibernate ORM com Panache)
+*   **Apache Kafka** (Mensageria assíncrona via SmallRye Reactive Messaging)
+*   **MicroProfile Fault Tolerance** (Resiliência: Circuit Breaker, Retry, Fallback, Timeout)
+*   **Docker** & **Docker Compose**
 
-```shell script
+## 🏗️ Arquitetura do Projeto
+
+O projeto está estruturado em camadas conforme a Arquitetura Hexagonal:
+
+```
+src/main/java/com/adjt
+├── application
+│   ├── ports         # Interfaces de entrada (In) e saída (Out)
+│   ├── usecases      # Implementação das regras de negócio (Processar, Reprocessar)
+│   ├── shared        # Serviços de domínio compartilhados (EfetivarPagamentoService)
+│   └── exceptions    # Exceções de aplicação
+├── domain            # Núcleo da lógica de negócio
+│   ├── entities      # Entidades (Pagamento) e Enums (StatusPagamento)
+│   └── exceptions    # Exceções de domínio
+└── infrastructure    # Adaptadores externos
+    ├── config        # Configurações do Quarkus/CDI
+    ├── database      # Repositórios e Entidades JPA (PostgreSQL)
+    ├── gateways      # Clientes REST para serviços externos
+    └── messaging     # Consumidores e Produtores Kafka
+```
+
+### Fluxos Principais
+
+1.  **Processamento de Pagamento:**
+    *   Recebe evento `pedido.criado`.
+    *   Cria registro de pagamento com status `PENDENTE`.
+    *   Chama Gateway Externo.
+    *   Se sucesso: Atualiza para `APROVADO` e publica evento `pagamento.aprovado`.
+    *   Se falha/erro: Mantém como `PENDENTE` e publica evento `pagamento.pendente`.
+
+2.  **Reprocessamento de Pagamento:**
+    *   Recebe evento `pagamento.pendente` (via Dead Letter Queue ou fluxo de retentativa).
+    *   Busca pagamento existente.
+    *   Reexecuta a lógica de chamada ao Gateway Externo.
+
+## ⚙️ Configuração
+
+O serviço utiliza variáveis de ambiente para configuração. Abaixo estão as principais variáveis definidas no `application.yaml`:
+
+| Variável | Descrição | Valor Padrão |
+| :--- | :--- | :--- |
+| `DB_HOST` | Host do banco de dados PostgreSQL | `localhost` |
+| `DB_PORT` | Porta do banco de dados | `5432` |
+| `DB_NAME` | Nome do banco de dados | `pagamentosdb` |
+| `DB_USER` | Usuário do banco | `postgres` |
+| `DB_PASSWORD` | Senha do banco | `postgres` |
+| `KAFKA_HOST` | Host do Broker Kafka | `localhost` |
+| `KAFKA_PORT` | Porta do Broker Kafka | `9092` |
+| `PAGAMENTO_EXTERNO_URL` | URL do Gateway de Pagamento Externo | `http://localhost:8089` |
+
+## 📡 Contratos de Mensageria (Kafka)
+
+O serviço interage com outros microsserviços através de tópicos Kafka.
+
+*   **Consome:**
+    *   `pedido.criado` (Inicia fluxo de pagamento)
+    *   `pagamento.pendente` (Inicia fluxo de reprocessamento)
+*   **Produz:**
+    *   `pagamento.aprovado` (Sucesso)
+    *   `pagamento.pendente` (Falha recuperável)
+
+Para detalhes completos sobre os payloads JSON, consulte o arquivo [KAFKA_PAYLOADS.md](./KAFKA_PAYLOADS.md).
+
+## 🛠️ Como Executar
+
+### Pré-requisitos
+*   JDK 21+
+*   Docker (para subir as dependências de infraestrutura)
+
+### 1. Subir Infraestrutura (Banco de Dados e Kafka)
+Certifique-se de ter um PostgreSQL e um Kafka rodando acessíveis nas portas configuradas, ou utilize um `docker-compose.yml` (se disponível no workspace principal).
+
+### 2. Modo de Desenvolvimento (Dev Mode)
+Para rodar a aplicação em modo de desenvolvimento com *live coding*:
+
+```bash
 ./mvnw quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+### 3. Empacotar e Rodar (JVM)
+Para gerar o JAR e executar:
 
-## Packaging and running the application
-
-The application can be packaged using:
-
-```shell script
+```bash
 ./mvnw package
+java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+### 4. Executar via Docker
+Para construir e rodar a imagem Docker JVM:
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+```bash
+# Build da imagem
+docker build -f src/main/docker/Dockerfile.jvm -t quarkus/chef-payment-service-jvm .
 
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+# Executar container
+docker run -i --rm -p 8080:8080 --network host quarkus/chef-payment-service-jvm
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+## 🛡️ Resiliência
 
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/chef-payment-service-1.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Provided Code
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+O serviço implementa padrões de resiliência na comunicação com o Gateway de Pagamento Externo:
+*   **Timeout:** 1 segundo.
+*   **Retry:** 2 tentativas automáticas em caso de falha.
+*   **Circuit Breaker:** Abre o circuito se 50% das requisições falharem (janela de 4 requisições).
+*   **Fallback:** Em caso de falha total, o pagamento é marcado como pendente e um evento é disparado para tratamento posterior (reprocessamento).
