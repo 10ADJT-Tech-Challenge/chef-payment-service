@@ -20,9 +20,9 @@ public class EventoSolicitacaoPagamentoConsumerAdapter {
     @Inject
     ProcessarPagamento processarPagamento;
 
-    @Blocking
+    @Blocking("pagamento-pool")
     @Transactional
-    @Incoming("pedido.criado.in")
+    @Incoming("pedido-criado-in")
     public CompletionStage<Void> consumirMensagem(Message<EventoSolicitacaoPagamentoMessage> mensagem) {
         EventoSolicitacaoPagamentoMessage payload = mensagem.getPayload();
 

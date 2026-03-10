@@ -15,7 +15,7 @@ public class EventoPagamentoAprovadoProducerAdapter implements EventoPagamentoAp
     private static final Logger LOG = LoggerFactory.getLogger(EventoPagamentoAprovadoProducerAdapter.class);
 
     @Inject
-    @Channel("pagamento.aprovado.out")
+    @Channel("pagamento-aprovado-out")
     Emitter<EventoPagamentoAprovadoMessage> pagamentoAprovadoEmitter;
 
     @Override
