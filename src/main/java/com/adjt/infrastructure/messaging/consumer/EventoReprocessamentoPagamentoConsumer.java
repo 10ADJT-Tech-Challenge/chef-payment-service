@@ -2,7 +2,7 @@ package com.adjt.infrastructure.messaging.consumer;
 
 import com.adjt.application.ports.in.ReprocessarPagamento;
 import com.adjt.infrastructure.messaging.dto.EventoPagamentoPendenteMessage;
-import io.smallrye.common.annotation.Blocking;
+import io.smallrye.reactive.messaging.annotations.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -20,9 +20,9 @@ public class EventoReprocessamentoPagamentoConsumer {
     @Inject
     ReprocessarPagamento reprocessarPagamento;
 
-    @Blocking
+    @Blocking("pedido-pool")
     @Transactional
-    @Incoming("pagamento.pendente.in")
+    @Incoming("pagamento-pendente-in")
     public CompletionStage<Void> consumirMensagem(Message<EventoPagamentoPendenteMessage> mensagem) {
         EventoPagamentoPendenteMessage payload = mensagem.getPayload();
         LOG.info("Evento de reprocessamento de pagamento recebido: {}", payload);

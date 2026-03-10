@@ -15,7 +15,7 @@ public class EventoPagamentoPendenteProducerAdapter implements EventoPagamentoPe
     private static final Logger LOG = LoggerFactory.getLogger(EventoPagamentoPendenteProducerAdapter.class);
 
     @Inject
-    @Channel("pagamento.pendente.out")
+    @Channel("pagamento-pendente-out")
     Emitter<EventoPagamentoPendenteMessage> pagamentoPendenteEmitter;
 
     @Override
