@@ -55,7 +55,7 @@ mp:
         commit-strategy: throttled          # Faz commit de offsets em lote para reduzir overhead
         concurrency: 4                      # cria múltiplos consumidores paralelos
         group:
-          id: pagamento-service             # Consumer group que permite balanceamento entre instâncias do serviço
+          id: pedido-criado-service             # Consumer group que permite balanceamento entre instâncias do serviço
         auto:
           offset:
             reset: earliest                 # fará com que o serviço leia todas as mensagens antigas presas no tópico assim que reiniciar
@@ -66,7 +66,7 @@ mp:
         commit-strategy: throttled          # Faz commit de offsets em lote para reduzir overhead
         concurrency: 4                      # cria múltiplos consumidores paralelos
         group:
-          id: pagamento-service             # Consumer group que permite balanceamento entre instâncias do serviço
+          id: pagamento-pendente-service             # Consumer group que permite balanceamento entre instâncias do serviço
         auto:
           offset:
             reset: earliest                 # fará com que o serviço leia todas as mensagens antigas presas no tópico assim que reiniciar
