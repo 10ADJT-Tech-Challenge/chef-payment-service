@@ -16,6 +16,8 @@ quarkus:
   rest-client:
     api-pagamento-externo:
       url: ${PAGAMENTO_EXTERNO_URL:http://localhost:8089}
+      read-timeout: 5000
+      connect-timeout: 2000
     logging:
       scope: all
       body-limit: 1024
@@ -50,7 +52,6 @@ mp:
         connector: smallrye-kafka
         topic: pedido.criado
         max.poll.interval.ms: 900000        # 15 minutos para evitar rebalance em processamento longo
-        failure-strategy: dead-letter-queue # Evita travar o consumo enviando mensagens com erro para DLQ
         commit-strategy: throttled          # Faz commit de offsets em lote para reduzir overhead
         concurrency: 4                      # cria múltiplos consumidores paralelos
         group:
@@ -62,7 +63,6 @@ mp:
         connector: smallrye-kafka
         topic: pagamento.pendente
         max.poll.interval.ms: 900000        # 15 minutos para evitar rebalance em processamento longo
-        failure-strategy: dead-letter-queue # Evita travar o consumo enviando mensagens com erro para DLQ
         commit-strategy: throttled          # Faz commit de offsets em lote para reduzir overhead
         concurrency: 4                      # cria múltiplos consumidores paralelos
         group:

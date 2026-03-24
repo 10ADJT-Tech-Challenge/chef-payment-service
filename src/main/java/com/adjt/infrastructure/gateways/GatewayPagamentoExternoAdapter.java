@@ -9,12 +9,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.time.temporal.ChronoUnit;
 
 @ApplicationScoped
 public class GatewayPagamentoExternoAdapter implements GatewayPagamentoExterno {
@@ -24,7 +21,6 @@ public class GatewayPagamentoExternoAdapter implements GatewayPagamentoExterno {
     PagamentoExternoRestClient restClient;
 
     @Override
-    @Timeout(value = 1, unit = ChronoUnit.SECONDS)
     @Retry(maxRetries = 2)
     @Fallback(fallbackMethod = "fallbackFalhaProcessamento")
     @CircuitBreaker(requestVolumeThreshold = 4, // Número de requisições a serem examinadas antes de calcular a taxa de falha.
